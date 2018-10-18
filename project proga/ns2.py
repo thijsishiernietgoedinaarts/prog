@@ -42,7 +42,9 @@ def getinformation(x): #dit haalt alle informatie
         vertrektijd = vertrek['VertrekTijd']      # 2016-09-27T18:36:00+0200
         vertrektijd = vertrektijd[11:16]          # 18:36
         spoor=  vertrek['VertrekSpoor']
-        verbeterdspoort= int(spoor['#text'])
+        try:
+            verbeterdspoort= int(spoor['#text'])
+        except: verbeterdspoort= spoor['#text']
         typetrein=  vertrek['TreinSoort']
         lijst=[vertrektijd,verbeterdspoort,typetrein,eindbestemming]
         #print('Om '+vertrektijd+' vertrekt een' ,typetrein,'op spoor',spoor['#text'], 'naar '+ eindbestemming)
@@ -66,6 +68,35 @@ def gesortopspoor(x):
     for inf in newx:
         print('Om',inf[0],'vertrekt een',str(inf[2]),'op spoor',inf[1], 'naar ', str(inf[3]))
 
+def verwijderletter(data, chars): #deze functie probeert de amsterdam spoor te soorteren want die heeft letters bij de nummers
+    new_data = data
+    for ch in chars:
+        new_data = new_data.replace(ch, '')
+    return new_data
+
+def gesortopspooralt(sub_li): #deze functie probeert de amsterdam spoor te soorteren want die heeft letters bij de nummers
+        l = len(sub_li)
+        for i in range(0, l):
+            for j in range(0, l - i - 1):
+                try:
+                    nummer=verwijderletter(sub_li[j][1],'ab')
+                except:
+                    nummer=sub_li[j][1]
+                try:
+                    nummer2=verwijderletter(sub_li[j + 1][1],'ab')
+                except:
+                    nummer2=sub_li[j + 1][1]
+                if (int(nummer) > int(nummer2)):
+                    tempo = sub_li[j]
+                    sub_li[j] = sub_li[j + 1]
+                    sub_li[j + 1] = tempo
+        return sub_li
+
+
+def spooralt(x): #deze functie probeert de amsterdam spoor te soorteren want die heeft letters bij de nummers
+    newx=gesortopspooralt(x)
+    for inf in newx:
+        print('Om',inf[0],'vertrekt een',str(inf[2]),'op spoor',inf[1], 'naar ', str(inf[3]))
 
 
 def Sortbijtijd(sub_li):
@@ -93,14 +124,21 @@ lijst2=getinformation('ut')
 #gesortoptijd(grotelijst2)
 #gesortopspoor(grotelijst2)
 stat='alfabet'
+def route():
+    begin= input('waar kom je vandaan')
+    einde= input('waar wil je naartoe')
+    adres=getinformation(begin)
+    for inf in adres:
+        besteming= inf[3].lower()
+        if besteming == einde.lower():
+            print('Om', inf[0], 'vertrekt een', str(inf[2]), 'op spoor', inf[1], 'naar ', str(inf[3]))
 while stat=='goed' or stat=='alfabet':
     stat=getstation()
-
-
     while stat !='goed':
         print('wil je dat de informatie op tijd of spoor gesorteerd is ')
         print('als u een ander station wilt selecteren type station in')
         print('als u een specifiec spoor wilt druk op specific')
+        print('als u een begin en eindadres hebt type plan')
         a = input('wat is uw keus')
         if a =='tijd':
             lijst2 = getinformation(stat)
@@ -109,11 +147,16 @@ while stat=='goed' or stat=='alfabet':
 
         if a =='spoor':
             lijst2 = getinformation(stat)
-            gesortopspoor(lijst2)
+            try:
+                gesortopspoor(lijst2)
+            except: spooralt(lijst2)
             print('\n')
         if a == 'station':
             stat='goed'
         if a == 'specific':
             lijst2= getinformation(stat)
             spespoor(lijst2)
+            print('\n')
+        if a == 'plan':
+            route()
             print('\n')
