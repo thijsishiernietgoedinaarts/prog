@@ -1,25 +1,28 @@
 import requests
 import xmltodict
 def getstation():
-    z = []
-    y = ''
-    x= input('naar welk station wilt u\n1)utrecht\n2)denbosch\n3)eindhoven\nof als u zelf een station wilt intypen druk op type')
+    while True:
+        z = []
+        y = ''
+        x= input('naar welk station wilt u\n1)utrecht\n2)denbosch\n3)eindhoven\nof als u zelf een station wilt intypen druk op type')
 
-    if x == '1':
-        return 'ut'
-    if x == '2':
-        return 'db'
-    if x == '3':
-        return 'eindhoven'
-    if x == 'type':
-        while True:
-            y=input('type het station in')
-            try:
-                getinformation(y)
-                return y
-            except: print('dit station staat er niet tussen\nje kan ook afkortingen gebruiken')
-    else:
-        return 'goed'
+        if x == '1':
+            return 'ut'
+        if x == '2':
+            return 'db'
+        if x == '3':
+            return 'eindhoven'
+        if x == 'type':
+            while True:
+                y=input('type het station in of druk op exit')
+                if y =='exit':
+                    break
+                try:
+                    getinformation(y)
+                    return y
+                except: print('dit station staat er niet tussen\nje kan ook afkortingen gebruiken')
+        else:
+            return 'goed'
 def getinformation(x): #dit haalt alle informatie
     auth_details = ('thijsaarts.aarts@student.hu.nl', '1IbHrkNUhwW6Bnezbn0C9F9_0GKMLSBkXo7vmFW97EHmfaMnVd2Oaw')
     api_url1 = 'http://webservices.ns.nl/ns-api-avt?station='
@@ -44,9 +47,12 @@ def getinformation(x): #dit haalt alle informatie
         spoor=vertrek['VertrekSpoor']
         try:                                            #dit stukje code moest veranderd worden want er was een error waarbij
             vertrekspoor= spoor['#text']                #als er geen treinspoor aangegeven was dat het programma niet wou uitvoeren
-        except: vertrekspoor= 'geen spoor beschikbaar'  #
+        except:
+            vertrekspoor=0  #
+            global errorvertrekspoor
+            errorvertrekspoor='true'
         verbeterdspoort=vertrekspoor
-        if vertrekspoor !='geen spoor beschikbaar':
+        if vertrekspoor !=0:
             try:
                 verbeterdspoort= int(vertrekspoor)
             except: verbeterdspoort= vertrekspoor
@@ -58,7 +64,7 @@ def getinformation(x): #dit haalt alle informatie
     return grotelijst
 
 def Sortbijspoor(sub_li):
-    try: # deze try is hier voor als er een probleem is met het spoor kan verbeterd worden
+
         l = len(sub_li)
         for i in range(0, l):
             for j in range(0, l - i - 1):
@@ -66,8 +72,9 @@ def Sortbijspoor(sub_li):
                     tempo = sub_li[j]
                     sub_li[j] = sub_li[j + 1]
                     sub_li[j + 1] = tempo
+
         return sub_li
-    except: return sub_li
+
 
 # Driver Code
 def gesortopspoor(x):
@@ -82,7 +89,7 @@ def verwijderletter(data, chars): #deze functie probeert de amsterdam spoor te s
     return new_data
 
 def gesortopspooralt(sub_li): #deze functie probeert het spoor te soorteren als er letters staan bij de nummers
-    try:
+    try: # dit is voor wanneer er een error is met de treinsporen
         l = len(sub_li)
         for i in range(0, l):
             for j in range(0, l - i - 1):
@@ -98,8 +105,10 @@ def gesortopspooralt(sub_li): #deze functie probeert het spoor te soorteren als 
                     tempo = sub_li[j]
                     sub_li[j] = sub_li[j + 1]
                     sub_li[j + 1] = tempo
+
         return sub_li
-    except: return sub_li
+    except ValueError:
+            return sub_li
 
 def spooralt(x): #deze functie probeert de amsterdam spoor te soorteren want die heeft letters bij de nummers
     newx=gesortopspooralt(x)
@@ -140,6 +149,7 @@ def route():
         besteming= inf[3].lower()
         if besteming == einde.lower():
             print('Om', inf[0], 'vertrekt een', str(inf[2]), 'op spoor', inf[1], 'naar ', str(inf[3]))
+errorvertrekspoor=0
 while stat=='goed' or stat=='alfabet':
     stat=getstation()
     while stat !='goed':
@@ -155,6 +165,8 @@ while stat=='goed' or stat=='alfabet':
 
         if a =='spoor':
             lijst2 = getinformation(stat)
+            if errorvertrekspoor == 'true':
+                print('er is een probleem met de sporen.\nalle sporen die onbekend zijn heten nu spoor 0')
             try:
                 gesortopspoor(lijst2)
             except: spooralt(lijst2)
