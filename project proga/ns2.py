@@ -17,7 +17,7 @@ def getstation():
             try:
                 getinformation(y)
                 return y
-            except: print('dit station staat er niet tussen')
+            except: print('dit station staat er niet tussen\nje kan ook afkortingen gebruiken')
     else:
         return 'goed'
 def getinformation(x): #dit haalt alle informatie
@@ -41,10 +41,16 @@ def getinformation(x): #dit haalt alle informatie
 
         vertrektijd = vertrek['VertrekTijd']      # 2016-09-27T18:36:00+0200
         vertrektijd = vertrektijd[11:16]          # 18:36
-        spoor=  vertrek['VertrekSpoor']
-        try:
-            verbeterdspoort= int(spoor['#text'])
-        except: verbeterdspoort= spoor['#text']
+        spoor=vertrek['VertrekSpoor']
+        try:                                            #dit stukje code moest veranderd worden want er was een error waarbij
+            vertrekspoor= spoor['#text']                #als er geen treinspoor aangegeven was dat het programma niet wou uitvoeren
+        except: vertrekspoor= 'geen spoor beschikbaar'  #
+        verbeterdspoort=vertrekspoor
+        if vertrekspoor !='geen spoor beschikbaar':
+            try:
+                verbeterdspoort= int(vertrekspoor)
+            except: verbeterdspoort= vertrekspoor
+
         typetrein=  vertrek['TreinSoort']
         lijst=[vertrektijd,verbeterdspoort,typetrein,eindbestemming]
         #print('Om '+vertrektijd+' vertrekt een' ,typetrein,'op spoor',spoor['#text'], 'naar '+ eindbestemming)
@@ -52,15 +58,16 @@ def getinformation(x): #dit haalt alle informatie
     return grotelijst
 
 def Sortbijspoor(sub_li):
-    l = len(sub_li)
-    for i in range(0, l):
-        for j in range(0, l - i - 1):
-            if (sub_li[j][1] > sub_li[j + 1][1]):
-                tempo = sub_li[j]
-                sub_li[j] = sub_li[j + 1]
-                sub_li[j + 1] = tempo
-    return sub_li
-
+    try: # deze try is hier voor als er een probleem is met het spoor kan verbeterd worden
+        l = len(sub_li)
+        for i in range(0, l):
+            for j in range(0, l - i - 1):
+                if (sub_li[j][1] > sub_li[j + 1][1]):
+                    tempo = sub_li[j]
+                    sub_li[j] = sub_li[j + 1]
+                    sub_li[j + 1] = tempo
+        return sub_li
+    except: return sub_li
 
 # Driver Code
 def gesortopspoor(x):
@@ -74,7 +81,8 @@ def verwijderletter(data, chars): #deze functie probeert de amsterdam spoor te s
         new_data = new_data.replace(ch, '')
     return new_data
 
-def gesortopspooralt(sub_li): #deze functie probeert de amsterdam spoor te soorteren want die heeft letters bij de nummers
+def gesortopspooralt(sub_li): #deze functie probeert het spoor te soorteren als er letters staan bij de nummers
+    try:
         l = len(sub_li)
         for i in range(0, l):
             for j in range(0, l - i - 1):
@@ -91,7 +99,7 @@ def gesortopspooralt(sub_li): #deze functie probeert de amsterdam spoor te soort
                     sub_li[j] = sub_li[j + 1]
                     sub_li[j + 1] = tempo
         return sub_li
-
+    except: return sub_li
 
 def spooralt(x): #deze functie probeert de amsterdam spoor te soorteren want die heeft letters bij de nummers
     newx=gesortopspooralt(x)
